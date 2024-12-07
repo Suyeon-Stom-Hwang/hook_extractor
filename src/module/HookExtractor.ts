@@ -2,36 +2,136 @@ import * as acorn from "acorn";
 import * as espree from "espree";
 import * as walk from "acorn-walk";
 
-export interface IComponentNode {
-  id: string;
-  name: string;
-  props: IPropNode[];
-  states: IStateNode[];
-  effects: IEffectNode[];
-  children: IComponentNode[];
-  node: acorn.Node;
+class UniqueIdGenerator {
+  private prefix: string;
+  private id: number;
+
+  constructor(prefix: string = "") {
+    this.prefix = prefix;
+    this.id = 0;
+  }
+
+  public next() {
+    this.id += 1;
+    return `${this.prefix}_${this.id}`;
+  }
 }
 
-export interface IStateNode {
-  id: string;
+export class ComponentNode {
+  private static idGenerator = new UniqueIdGenerator("component");
+
+  readonly id: string;
+  readonly path: string;
+  readonly fileAst: acorn.Node;
+  readonly node: acorn.Node;
+
   name: string;
-  root: IComponentNode;
-  setter: string;
+  props: PropNode[];
+  states: StateNode[];
+  effects: EffectNode[];
+  children: ComponentNode[];
+  falseChildren: ComponentNode[];
+
+  constructor(
+    name: string,
+    path: string,
+    fileAst: acorn.Node,
+    node: acorn.Node
+  ) {
+    this.id = ComponentNode.idGenerator.next();
+    this.name = name;
+    this.path = path;
+    this.props = [];
+    this.states = [];
+    this.effects = [];
+    this.children = [];
+    this.falseChildren = [];
+    this.fileAst = fileAst;
+    this.node = node;
+  }
+
+  public visitChildren(callback: (node: ComponentNode) => void) {
+    for (const child of this.children) {
+      callback(child);
+      child.visitChildren(callback);
+    }
+  }
+
+  public getStateById(id: string) {
+    return this.states.find((state) => state.id === id);
+  }
+
+  public getStateByName(name: string) {
+    return this.states.find((state) => state.name === name);
+  }
+
+  public getPropById(id: string) {
+    return this.props.find((prop) => prop.id === id);
+  }
+
+  public getPropByName(name: string) {
+    return this.props.find((prop) => prop.name === name);
+  }
+
+  public getChildById(id: string) {
+    return this.children.find((child) => child.id === id);
+  }
 }
 
-export interface IPropNode {
-  id: string;
-  name: string;
+export class StateNode {
+  private static idGenerator = new UniqueIdGenerator("state");
+
+  readonly id: string;
+  readonly name: string;
+  readonly root: ComponentNode;
+  readonly setter: string;
+
+  constructor(name: string, root: ComponentNode, setter: string) {
+    this.id = StateNode.idGenerator.next();
+    this.name = name;
+    this.root = root;
+    this.setter = setter;
+  }
+}
+
+export class PropNode {
+  private static idGenerator = new UniqueIdGenerator("prop");
+
+  readonly id: string;
+  readonly name: string;
+  readonly root: ComponentNode;
+
   references: string[];
-  root: IComponentNode;
+
+  constructor(name: string, root: ComponentNode) {
+    this.id = PropNode.idGenerator.next();
+    this.name = name;
+    this.references = [];
+    this.root = root;
+  }
 }
 
-export interface IEffectNode {
-  id: string;
-  name: string;
-  root: IComponentNode;
-  body: acorn.Node;
-  dependencyIds: string[];
+export class EffectNode {
+  private static idGenerator = new UniqueIdGenerator("effect");
+
+  readonly id: string;
+  readonly name: string;
+  readonly root: ComponentNode;
+  readonly body: acorn.Node;
+  readonly dependencyIds: string[];
+
+  constructor(
+    name: string,
+    root: ComponentNode,
+    body: acorn.Node,
+    dependencyIds: string[]
+  ) {
+    this.id = EffectNode.idGenerator.next();
+    this.name = name;
+    this.root = root;
+    this.body = body;
+    this.dependencyIds = dependencyIds;
+  }
 }
 
 // From acorn-jsx-walk
@@ -95,21 +195,13 @@ function extend(base: any) {
 }
 
 export default class HookExtractor {
-  componentId: number;
-  stateId: number;
-  propId: number;
-  effectId: number;
-  componentList: IComponentNode[];
-  stateList: IStateNode[];
-  propList: IPropNode[];
-  effectList: IEffectNode[];
-  asts: acorn.Node[];
+  componentList: ComponentNode[];
+  stateList: StateNode[];
+  propList: PropNode[];
+  effectList: EffectNode[];
+  asts: { source: string; ast: acorn.Node; defaultModule: string }[];
 
   constructor() {
-    this.componentId = 0;
-    this.stateId = 0;
-    this.propId = 0;
-    this.effectId = 0;
     this.componentList = [];
     this.stateList = [];
     this.propList = [];
@@ -117,113 +209,81 @@ export default class HookExtractor {
     this.asts = [];
   }
 
-  private newComponentId() {
-    this.componentId += 1;
-    return "component_" + this.componentId;
+  public setProject(files: { source: string; content: string }[]) {
+    console.info("setProject", files);
+    for (const file of files) {
+      if (!file.source.includes("node_modules")) {
+        this.extractComponents(file.source, file.content);
+      }
+    }
+
+    this.linkComponents();
+    this.linkEffects();
   }
 
-  private newComponentNode(name: string, node: acorn.Node) {
-    const newComponent: IComponentNode = {
-      id: this.newComponentId(),
-      name: name,
-      props: [],
-      states: [],
-      effects: [],
-      children: [],
-      node: node,
-    };
-    newComponent.states = this.findState(node, newComponent);
-    newComponent.props = this.findProps(node, newComponent);
-    return newComponent;
-  }
+  public extractComponents(source: string, content: string) {
+    console.info("extractComponents", source);
 
-  private findState(astComponent: acorn.Node, component: IComponentNode) {
-    const states: IStateNode[] = [];
-    walk.fullAncestor(astComponent, (node, state, ancestor) => {
-      if (node.type !== "CallExpression") {
+    const ast = this.parseJsFile(content);
+    const defaultModule = this.extractDefaultModule(ast);
+    console.log("extractComponents - ast", ast);
+    this.asts.push({ source, ast, defaultModule });
+
+    extend(walk.base);
+    walk.fullAncestor<ComponentNode[]>(ast, (node, state, ancestor) => {
+      if (!this.isComponent(node)) {
         return;
       }
 
-      if (
-        (node as acorn.CallExpression).callee.type === "Identifier" &&
-        ((node as acorn.CallExpression).callee as acorn.Identifier).name ===
-          "useState"
-      ) {
-        console.log("CallExpression", node, ancestor.slice(0));
-        const parent = ancestor[ancestor.length - 2];
-        if (!parent || parent.type !== "VariableDeclarator") {
-          return;
-        }
+      const name =
+        node.type === "FunctionDeclaration"
+          ? (node as acorn.FunctionDeclaration).id?.name
+          : this.getArrowFunctionName(ancestor);
 
-        const returnValue = (parent as acorn.VariableDeclarator)
-          .id as acorn.ArrayPattern;
-        const name = (returnValue.elements[0] as acorn.Identifier).name;
-        const setter = (returnValue.elements[1] as acorn.Identifier).name;
-        states.push(this.newStateNode(component, name, setter));
+      if (!name || this.getComponentByName(name)) {
+        return;
       }
+
+      this.newComponentNode(name, source, ast, node);
     });
 
-    this.stateList = this.stateList.concat(states);
-    return states;
+    console.info("extractComponents - All components", this.componentList);
   }
 
-  private newStateId() {
-    this.stateId += 1;
-    return "state_" + this.stateId;
+  public parseJsFile(code: string) {
+    return espree.parse(code, {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      ecmaFeatures: {
+        jsx: true,
+      },
+    });
   }
 
-  private newStateNode(root: IComponentNode, name: string, setter: string) {
-    const id = this.newStateId();
-    return { id, name, root, setter };
-  }
+  private extractDefaultModule(ast: acorn.Node) {
+    let defaultModule = "";
+    extend(walk.base);
+    walk.simple(
+      ast,
+      {
+        ExportDefaultDeclaration: (node) => {
+          defaultModule = (node.declaration as acorn.Identifier).name;
+        },
+      },
+      walk.base
+    );
 
-  private findProps(astComponent: acorn.Node, component: IComponentNode) {
-    console.log("findProps", astComponent);
-    const props: IPropNode[] = [];
-    const params =
-      astComponent.type === "ArrowFunctionExpression"
-        ? (astComponent as acorn.ArrowFunctionExpression).params
-        : (astComponent as acorn.FunctionDeclaration).params;
-
-    if (params.length === 0) {
-      return props;
-    } else if (params.length === 1 && params[0].type === "ObjectPattern") {
-      console.log("check");
-      for (const property of (params[0] as acorn.ObjectPattern).properties) {
-        if (property.type === "Property") {
-          const name = (property.key as acorn.Identifier).name;
-          props.push(this.newPropNode(component, name));
-        }
-      }
-    }
-
-    this.propList = this.propList.concat(props);
-    return props;
-  }
-
-  private newPropId() {
-    this.propId += 1;
-    return "prop_" + this.propId;
-  }
-
-  private newPropNode(root: IComponentNode, name: string) {
-    const id = this.newPropId();
-    return { id, name, references: [], root };
-  }
-
-  private getArrowFunctionName(ancestors: acorn.Node[]) {
-    const parent = ancestors[ancestors.length - 2];
-    if (parent && parent.type === "VariableDeclarator") {
-      console.log(
-        "parent",
-        ((parent as acorn.VariableDeclarator).id as acorn.Identifier).name
-      );
-      return ((parent as acorn.VariableDeclarator).id as acorn.Identifier).name;
-    }
-    return null;
+    return defaultModule;
   }
 
   private isComponent(node: acorn.Node) {
+    if (
+      node.type !== "FunctionDeclaration" &&
+      node.type !== "ArrowFunctionExpression"
+    ) {
+      return false;
+    }
+
     let isComponent = false;
     extend(walk.base);
     // FIXME: Return value check
@@ -236,187 +296,325 @@ export default class HookExtractor {
     return isComponent;
   }
 
-  public extract(ast: acorn.Node) {
-    console.log("extract", ast);
-    this.asts.push(ast);
-
-    extend(walk.base);
-    walk.fullAncestor<IComponentNode[]>(ast, (node, state, ancestor) => {
-      if (node.type === "FunctionDeclaration" && this.isComponent(node)) {
-        console.log("isComponent", "FunctionDeclaration", node);
-        const name = (node as acorn.FunctionDeclaration).id?.name || null;
-
-        if (
-          name === null ||
-          this.componentList.find((component) => component.name === name)
-        ) {
-          return;
-        }
-
-        const component = this.newComponentNode(name, node);
-        this.componentList.push(component);
-      } else if (
-        node.type === "ArrowFunctionExpression" &&
-        this.isComponent(node)
-      ) {
-        console.log("isComponent", "ArrowFunctionExpression", node);
-        const name = this.getArrowFunctionName(ancestor);
-
-        if (
-          name === null ||
-          this.componentList.find((component) => component.name === name)
-        ) {
-          return;
-        }
-
-        const component = this.newComponentNode(name, node);
-        this.componentList.push(component);
-      }
-    });
-
-    console.log("Current components", this.componentList);
+  private getArrowFunctionName(ancestors: acorn.Node[]) {
+    const parent = ancestors[ancestors.length - 2];
+    if (parent && parent.type === "VariableDeclarator") {
+      return ((parent as acorn.VariableDeclarator).id as acorn.Identifier).name;
+    }
+    return null;
   }
 
-  private findAttribute(component: IComponentNode, openingElement: any) {
-    for (const attribute of openingElement.attributes) {
-      if (attribute.type === "JSXAttribute") {
-        const name = attribute.name.name;
-        let target = component.props.find((prop) => prop.name === name);
+  private newComponentNode(
+    name: string,
+    path: string,
+    fileAst: acorn.Node,
+    node: acorn.Node
+  ) {
+    const newComponent = new ComponentNode(name, path, fileAst, node);
+    newComponent.states = this.extractStates(node, newComponent);
+    newComponent.props = this.extractProps(node, newComponent);
 
-        if (!target) {
-          console.log("Props target", component, attribute);
-          target = this.newPropNode(component, name);
-          component.props.push(target);
-          this.propList.push(target);
-        }
+    this.componentList.push(newComponent);
+    return newComponent;
+  }
 
-        if (target) {
-          const expression = attribute.value.expression;
-          if (expression.type === "Identifier") {
-            const name = (expression as acorn.Identifier).name;
-            const reference =
-              this.getStateByName(name) || this.getPropByName(name);
-            if (reference) {
-              target.references.push(reference.id);
-            }
-          } else if (expression.type === "MemberExpression") {
-            const property = (expression as acorn.MemberExpression).property;
-            walk.simple(
-              property,
-              {
-                Identifier: (node, state) => {
-                  const reference =
-                    this.getStateByName(name) || this.getPropByName(name);
-                  if (reference) {
-                    state.references.push(reference.id);
-                  }
-                },
-              },
-              walk.base,
-              target
-            );
-          }
+  private extractStates(astComponent: acorn.Node, component: ComponentNode) {
+    console.log("extractStates", astComponent);
+    const states: StateNode[] = [];
+    const isCalleeUseState = (callee: acorn.Expression | acorn.Super) => {
+      if (callee.type === "Identifier") {
+        return (callee as acorn.Identifier).name === "useState";
+      }
+
+      if (callee.type === "MemberExpression") {
+        return (callee.property as acorn.Identifier).name === "useState";
+      }
+
+      return false;
+    };
+
+    walk.fullAncestor(astComponent, (node, state, ancestor) => {
+      if (node.type !== "CallExpression") {
+        return;
+      }
+
+      if (!isCalleeUseState((node as acorn.CallExpression).callee)) {
+        return;
+      }
+
+      console.log("CallExpression", node, ancestor.slice(0));
+      const parent = ancestor[ancestor.length - 2];
+      if (!parent || parent.type !== "VariableDeclarator") {
+        return;
+      }
+
+      const returnValue = (parent as acorn.VariableDeclarator)
+        .id as acorn.ArrayPattern;
+      const name = (returnValue.elements[0] as acorn.Identifier).name;
+      const setter = (returnValue.elements[1] as acorn.Identifier).name;
+      states.push(this.newStateNode(component, name, setter));
+    });
+
+    return states;
+  }
+
+  private newStateNode(root: ComponentNode, name: string, setter: string) {
+    const newState = new StateNode(name, root, setter);
+
+    this.stateList.push(newState);
+    return newState;
+  }
+
+  private extractProps(astComponent: acorn.Node, component: ComponentNode) {
+    console.log("extractProps", astComponent);
+    const props: PropNode[] = [];
+    const params =
+      astComponent.type === "ArrowFunctionExpression"
+        ? (astComponent as acorn.ArrowFunctionExpression).params
+        : (astComponent as acorn.FunctionDeclaration).params;
+
+    if (params.length === 0) {
+      return props;
+    }
+
+    if (params.length === 1 && params[0].type === "ObjectPattern") {
+      for (const property of (params[0] as acorn.ObjectPattern).properties) {
+        if (property.type === "Property") {
+          const name = (property.key as acorn.Identifier).name;
+          props.push(this.newPropNode(component, name));
         }
       }
     }
+
+    return props;
+  }
+
+  private newPropNode(root: ComponentNode, name: string) {
+    const newProp = new PropNode(name, root);
+    this.propList.push(newProp);
+    return newProp;
+  }
+
+  private extractImportedComponents(ast: acorn.Node, source: string) {
+    const currentPath = source.split("/").slice(0, -1).join("/");
+    console.info("getImportedComponents", currentPath);
+
+    const importedComponents: string[] = [];
+    walk.simple(ast, {
+      ImportDeclaration: (node) => {
+        const source = ((node.source as acorn.Literal).value as string) || "";
+
+        walk.simple(node, {
+          ImportSpecifier: (node) => {
+            const name = (node.imported as acorn.Identifier).name;
+            const component = this.getComponentByName(name);
+            if (component) {
+              importedComponents.push(component.id);
+            }
+          },
+          ImportDefaultSpecifier: (node) => {
+            const name = this.getDefaultModuleName(source, currentPath);
+            const component = this.getComponentByName(name);
+            if (component) {
+              importedComponents.push(component.id);
+            }
+          },
+        });
+      },
+    });
+
+    return importedComponents;
+  }
+
+  private getDefaultModuleName(relativePath: string, currentPath: string) {
+    const relativePathParts = relativePath.split("/");
+    const currentPathParts = currentPath.split("/");
+    let hierarchy = currentPathParts.length;
+    let absolutePathIndex = -1;
+    relativePathParts.forEach((part, i) => {
+      if (part === "..") {
+        absolutePathIndex = i;
+        hierarchy--;
+      } else if (part === ".") {
+        absolutePathIndex = i;
+      }
+    });
+
+    if (absolutePathIndex < 0) {
+      return "";
+    }
+
+    const modifiedPath = currentPath
+      .split("/")
+      .slice(0, hierarchy)
+      .concat(relativePathParts.slice(absolutePathIndex + 1))
+      .join("/");
+    console.log(
+      "getDefaultModule",
+      relativePath,
+      modifiedPath,
+      this.asts.find((ast) => ast.source.startsWith(modifiedPath))
+    );
+
+    return (
+      this.asts.find((ast) => ast.source.startsWith(modifiedPath))
+        ?.defaultModule || ""
+    );
   }
 
   public linkComponents() {
-    for (const component of this.componentList) {
+    console.info("linkComponents");
+    this.componentList.forEach((component) => {
       walk.full(component.node, (node) => {
-        if (node.type === "JSXElement") {
-          const openingElement = (node as any).openingElement;
-          const name = openingElement.name.name;
-          const target = this.componentList.find(
-            (component) => component.name === name
-          );
-
-          if (target) {
-            console.log("target", component, target, openingElement);
-            this.findAttribute(target, openingElement);
-            component.children.push(target);
-          }
+        if (node.type !== "JSXElement") {
+          return;
         }
+
+        const openingElement = (node as any).openingElement;
+        const target = this.getComponentByName(openingElement.name.name);
+
+        if (!target) {
+          return;
+        }
+
+        console.log("linkComponents", component, target, openingElement);
+        this.findAttribute(target, openingElement);
+        component.children.push(target);
       });
+
+      const importedComponents = this.extractImportedComponents(
+        component.fileAst,
+        component.path
+      );
+
+      importedComponents.forEach((id) => {
+        if (component.getChildById(id)) {
+          return;
+        }
+
+        const target = this.getComponentById(id);
+        if (!target) {
+          return;
+        }
+
+        component.falseChildren.push(target);
+      });
+    });
+  }
+
+  private findAttribute(component: ComponentNode, openingElement: any) {
+    console.info("findAttribute", component, openingElement);
+    for (const attribute of openingElement.attributes) {
+      if (attribute.type !== "JSXAttribute") {
+        return;
+      }
+
+      const name = attribute.name.name;
+      let target = component.getPropByName(name);
+
+      if (!target) {
+        console.log("Props target", component, attribute);
+        target = this.newPropNode(component, name);
+        component.props.push(target);
+      }
+
+      if (!target) {
+        return;
+      }
+
+      const expression = attribute.value.expression;
+      if (expression.type === "Identifier") {
+        const name = (expression as acorn.Identifier).name;
+        const reference = this.getStateByName(name) || this.getPropByName(name);
+        if (reference) {
+          target.references.push(reference.id);
+        }
+      } else if (expression.type === "MemberExpression") {
+        const property = (expression as acorn.MemberExpression).property;
+        walk.simple(
+          property,
+          {
+            Identifier: (node, state) => {
+              const name = node.name;
+              const reference =
+                this.getStateByName(name) || this.getPropByName(name);
+              if (reference) {
+                state.references.push(reference.id);
+              }
+            },
+          },
+          walk.base,
+          target
+        );
+      }
     }
   }
 
-  private findEffects(component: IComponentNode) {
+  private findEffects(component: ComponentNode) {
     const astComponent = component.node;
 
-    const effects: IEffectNode[] = [];
-    walk.fullAncestor(astComponent, (node, state, ancestor) => {
-      if (node.type === "CallExpression") {
-        const callee = (node as acorn.CallExpression).callee;
-        if (callee.type === "Identifier") {
-          const name = (callee as acorn.Identifier).name;
-          if (name === "useEffect") {
-            console.log("useEffect", node);
-            const args = (node as acorn.CallExpression).arguments;
-            const dependencieIds = args[1]
-              ? (args[1] as acorn.ArrayExpression).elements
-                  .filter(
-                    (element) =>
-                      component.states.find(
-                        (state) =>
-                          state.name === (element as acorn.Identifier).name
-                      ) ||
-                      component.props.find(
-                        (prop) =>
-                          prop.name === (element as acorn.Identifier).name
-                      )
-                  )
-                  .map(
-                    (element) =>
-                      (component.states.find(
-                        (state) =>
-                          state.name === (element as acorn.Identifier).name
-                      )?.id ||
-                        component.props.find(
-                          (prop) =>
-                            prop.name === (element as acorn.Identifier).name
-                        )?.id) as string
-                  )
-              : [];
-
-            console.log("dependency", dependencieIds);
-            const effect = this.newEffectNode(
-              component,
-              name,
-              args[0],
-              dependencieIds
-            );
-            effects.push(effect);
-          }
-        }
+    const effects: EffectNode[] = [];
+    walk.full(astComponent, (node) => {
+      if (node.type !== "CallExpression") {
+        return;
       }
+
+      const callee = (node as acorn.CallExpression).callee;
+      if (callee.type !== "Identifier") {
+        return;
+      }
+
+      const name = callee.name;
+      if (name !== "useEffect") {
+        return;
+      }
+
+      console.log("useEffect", node);
+      const args = (node as acorn.CallExpression).arguments;
+      const dependencieIds = args[1]
+        ? (args[1] as acorn.ArrayExpression).elements
+            .filter((element) => {
+              const name = (element as acorn.Identifier).name;
+              return (
+                component.getStateByName(name) || component.getPropByName(name)
+              );
+            })
+            .map((element) => {
+              const name = (element as acorn.Identifier).name;
+              return (component.getStateByName(name)?.id ||
+                component.getPropByName(name)?.id) as string;
+            })
+        : [];
+
+      console.log("dependency", dependencieIds);
+      const effect = this.newEffectNode(
+        component,
+        name,
+        args[0],
+        dependencieIds
+      );
+      effects.push(effect);
     });
 
-    component.effects = component.effects.concat(effects);
-    this.effectList = this.effectList.concat(effects);
     return effects;
   }
 
-  private newEffectId() {
-    this.effectId += 1;
-    return "effect_" + this.effectId;
-  }
-
   private newEffectNode(
-    root: IComponentNode,
+    root: ComponentNode,
     name: string,
     body: acorn.Node,
     dependencyIds: string[]
   ) {
-    const id = this.newEffectId();
-    return { id, name, root, body, dependencyIds };
+    const newEffect = new EffectNode(name, root, body, dependencyIds);
+    this.effectList.push(newEffect);
+    return newEffect;
   }
 
   public linkEffects() {
-    for (const component of this.componentList) {
+    this.componentList.forEach((component) => {
       const effects = this.findEffects(component);
       component.effects = effects;
-    }
+    });
   }
 
   public print() {
@@ -424,6 +622,10 @@ export default class HookExtractor {
     console.log("States", this.stateList);
     console.log("Props", this.propList);
     console.log("Effects", this.effectList);
+
+    this.componentList.forEach((component) => {
+      console.log("Chidren count", component, this.countChidren(component));
+    });
   }
 
   public getComponentById(id: string) {
@@ -516,13 +718,28 @@ export default class HookExtractor {
     return JSON.stringify(json, null, 2);
   }
 
-  public parseJsFile(code: string) {
-    return espree.parse(code, {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      ecmaFeatures: {
-        jsx: true,
-      },
+  public visitChildren(
+    component: ComponentNode,
+    callback: (node: ComponentNode) => void
+  ) {
+    const visited: string[] = [];
+    component.children.forEach((child) => {
+      if (visited.includes(child.id)) {
+        return;
+      }
+
+      visited.push(child.id);
+      callback(child);
+      this.visitChildren(child, callback);
     });
+  }
+
+  public countChidren(component: ComponentNode) {
+    let count = 0;
+    this.visitChildren(component, () => {
+      count += 1;
+    });
+
+    return count;
   }
 }

@@ -1,424 +1,614 @@
 {
-    "componentList": {
-      "total": 17,
-      "items": [
-        {
-          "id": "component_1",
-          "name": "App",
-          "props": [],
-          "states": [],
-          "effects": [],
-          "children": [
-            "component_6",
-            "component_4",
-            "component_5",
-            "component_3",
-            "component_2",
-            "component_7",
-            "component_8"
-          ]
-        },
-        {
-          "id": "component_2",
-          "name": "Details",
-          "props": [],
-          "states": [
-            "state_1",
-            "state_2"
-          ],
-          "effects": [
-            "effect_1",
-            "effect_2"
-          ],
-          "children": [
-            "component_12",
-            "component_17"
-          ]
-        },
-        {
-          "id": "component_3",
-          "name": "Home",
-          "props": [],
-          "states": [],
-          "effects": [
-            "effect_3",
-            "effect_4"
-          ],
-          "children": [
-            "component_14"
-          ]
-        },
-        {
-          "id": "component_4",
-          "name": "Layout",
-          "props": [],
-          "states": [],
-          "effects": [],
-          "children": []
-        },
-        {
-          "id": "component_5",
-          "name": "Liquor",
-          "props": [],
-          "states": [],
-          "effects": [
-            "effect_5",
-            "effect_6"
-          ],
-          "children": [
-            "component_10"
-          ]
-        },
-        {
-          "id": "component_6",
-          "name": "Login",
-          "props": [],
-          "states": [
-            "state_3",
-            "state_4"
-          ],
-          "effects": [
-            "effect_7"
-          ],
-          "children": []
-        },
-        {
-          "id": "component_7",
-          "name": "Quiz",
-          "props": [],
-          "states": [
-            "state_5",
-            "state_6",
-            "state_7",
-            "state_8"
-          ],
-          "effects": [
-            "effect_8",
-            "effect_9"
-          ],
-          "children": [
-            "component_16"
-          ]
-        },
-        {
-          "id": "component_8",
-          "name": "Register",
-          "props": [],
-          "states": [
-            "state_9",
-            "state_10",
-            "state_11"
-          ],
-          "effects": [
-            "effect_10"
-          ],
-          "children": []
-        },
-        {
-          "id": "component_9",
-          "name": "FilteredItems",
-          "props": [
-            "prop_1",
-            "prop_11"
-          ],
-          "states": [],
-          "effects": [],
-          "children": []
-        },
-        {
-          "id": "component_10",
-          "name": "FilteredPaginatedItems",
-          "props": [
-            "prop_2"
-          ],
-          "states": [],
-          "effects": [
-            "effect_11"
-          ],
-          "children": [
-            "component_9"
-          ]
-        },
-        {
-          "id": "component_11",
-          "name": "Items",
-          "props": [
-            "prop_3"
-          ],
-          "states": [],
-          "effects": [],
-          "children": []
-        },
-        {
-          "id": "component_12",
-          "name": "KakaoRecommendButton",
-          "props": [
-            "prop_4",
-            "prop_5",
-            "prop_6"
-          ],
-          "states": [],
-          "effects": [
-            "effect_12"
-          ],
-          "children": []
-        },
-        {
-          "id": "component_13",
-          "name": "KakaoShareButton",
-          "props": [],
-          "states": [],
-          "effects": [
-            "effect_13"
-          ],
-          "children": []
-        },
-        {
-          "id": "component_14",
-          "name": "PaginatedItems",
-          "props": [
-            "prop_7"
-          ],
-          "states": [],
-          "effects": [
-            "effect_14"
-          ],
-          "children": [
-            "component_11"
-          ]
-        },
-        {
-          "id": "component_15",
-          "name": "QuizHeader",
-          "props": [],
-          "states": [],
-          "effects": [],
-          "children": []
-        },
-        {
-          "id": "component_16",
-          "name": "RecommendItems",
-          "props": [
-            "prop_8",
-            "prop_9"
-          ],
-          "states": [],
-          "effects": [],
-          "children": [
-            "component_12"
-          ]
-        },
-        {
-          "id": "component_17",
-          "name": "StarRates",
-          "props": [
-            "prop_10"
-          ],
-          "states": [],
-          "effects": [],
-          "children": []
-        }
-      ]
-    },
-    "stateList": {
-      "total": 11,
-      "items": [
-        {
-          "id": "state_1",
-          "name": "starRate",
-          "root": "component_2"
-        },
-        {
-          "id": "state_2",
-          "name": "review",
-          "root": "component_2"
-        },
-        {
-          "id": "state_3",
-          "name": "email",
-          "root": "component_6"
-        },
-        {
-          "id": "state_4",
-          "name": "password",
-          "root": "component_6"
-        },
-        {
-          "id": "state_5",
-          "name": "quizNumber",
-          "root": "component_7"
-        },
-        {
-          "id": "state_6",
-          "name": "conditionList",
-          "root": "component_7"
-        },
-        {
-          "id": "state_7",
-          "name": "mbti",
-          "root": "component_7"
-        },
-        {
-          "id": "state_8",
-          "name": "recommendedAlcohols",
-          "root": "component_7"
-        },
-        {
-          "id": "state_9",
-          "name": "email",
-          "root": "component_8"
-        },
-        {
-          "id": "state_10",
-          "name": "password",
-          "root": "component_8"
-        },
-        {
-          "id": "state_11",
-          "name": "nickname",
-          "root": "component_8"
-        }
-      ]
-    },
-    "effectList": {
-      "total": 14,
-      "items": [
-        {
-          "id": "effect_1",
-          "root": "component_2",
-          "dependencyIds": []
-        },
-        {
-          "id": "effect_2",
-          "root": "component_2",
-          "dependencyIds": []
-        },
-        {
-          "id": "effect_3",
-          "root": "component_3",
-          "dependencyIds": []
-        },
-        {
-          "id": "effect_4",
-          "root": "component_3",
-          "dependencyIds": []
-        },
-        {
-          "id": "effect_5",
-          "root": "component_5",
-          "dependencyIds": []
-        },
-        {
-          "id": "effect_6",
-          "root": "component_5",
-          "dependencyIds": []
-        },
-        {
-          "id": "effect_7",
-          "root": "component_6",
-          "dependencyIds": []
-        },
-        {
-          "id": "effect_8",
-          "root": "component_7",
-          "dependencyIds": []
-        },
-        {
-          "id": "effect_9",
-          "root": "component_7",
-          "dependencyIds": [
-            "state_5"
-          ]
-        },
-        {
-          "id": "effect_10",
-          "root": "component_8",
-          "dependencyIds": []
-        },
-        {
-          "id": "effect_11",
-          "root": "component_10",
-          "dependencyIds": [
-            "prop_2"
-          ]
-        },
-        {
-          "id": "effect_12",
-          "root": "component_12",
-          "dependencyIds": []
-        },
-        {
-          "id": "effect_13",
-          "root": "component_13",
-          "dependencyIds": []
-        },
-        {
-          "id": "effect_14",
-          "root": "component_14",
-          "dependencyIds": [
-            "prop_7"
-          ]
-        }
-      ]
-    },
-    "propList": {
-      "total": 11,
-      "items": [
-        {
-          "id": "prop_1",
-          "name": "currentFilteredAlcoholList",
-          "root": "component_9"
-        },
-        {
-          "id": "prop_2",
-          "name": "itemsPerPage",
-          "root": "component_10"
-        },
-        {
-          "id": "prop_3",
-          "name": "currentItems",
-          "root": "component_11"
-        },
-        {
-          "id": "prop_4",
-          "name": "description",
-          "root": "component_12"
-        },
-        {
-          "id": "prop_5",
-          "name": "buttonTitle",
-          "root": "component_12"
-        },
-        {
-          "id": "prop_6",
-          "name": "alcohol",
-          "root": "component_12"
-        },
-        {
-          "id": "prop_7",
-          "name": "itemsPerPage",
-          "root": "component_14"
-        },
-        {
-          "id": "prop_8",
-          "name": "mbtiCharacter",
-          "root": "component_16"
-        },
-        {
-          "id": "prop_9",
-          "name": "alcohols",
-          "root": "component_16"
-        },
-        {
-          "id": "prop_10",
-          "name": "starNum",
-          "root": "component_17"
-        },
-        {
-          "id": "prop_11",
-          "name": "currentItems",
-          "root": "component_9"
-        }
-      ]
-    }
+  "componentList": {
+    "total": 17,
+    "items": [
+      {
+        "id": "component_1",
+        "name": "App",
+        "props": [],
+        "states": [
+          "state_1",
+          "state_2",
+          "state_3",
+          "state_4",
+          "state_5",
+          "state_6",
+          "state_7",
+          "state_8",
+          "state_9"
+        ],
+        "effects": [],
+        "children": [
+          "component_6",
+          "component_4",
+          "component_5",
+          "component_3",
+          "component_2",
+          "component_7",
+          "component_8"
+        ]
+      },
+      {
+        "id": "component_2",
+        "name": "Details",
+        "props": [
+          "prop_1",
+          "prop_2"
+        ],
+        "states": [
+          "state_10",
+          "state_11"
+        ],
+        "effects": [
+          "effect_1",
+          "effect_2"
+        ],
+        "children": [
+          "component_12",
+          "component_17"
+        ]
+      },
+      {
+        "id": "component_3",
+        "name": "Home",
+        "props": [
+          "prop_21",
+          "prop_22",
+          "prop_23",
+          "prop_24",
+          "prop_25",
+          "prop_26",
+          "prop_27"
+        ],
+        "states": [],
+        "effects": [
+          "effect_3",
+          "effect_4"
+        ],
+        "children": [
+          "component_14"
+        ]
+      },
+      {
+        "id": "component_4",
+        "name": "Layout",
+        "props": [],
+        "states": [],
+        "effects": [],
+        "children": []
+      },
+      {
+        "id": "component_5",
+        "name": "Liquor",
+        "props": [
+          "prop_3",
+          "prop_4",
+          "prop_5",
+          "prop_6",
+          "prop_7",
+          "prop_8",
+          "prop_9"
+        ],
+        "states": [
+          "state_12"
+        ],
+        "effects": [
+          "effect_5",
+          "effect_6"
+        ],
+        "children": [
+          "component_10"
+        ]
+      },
+      {
+        "id": "component_6",
+        "name": "Login",
+        "props": [],
+        "states": [
+          "state_13",
+          "state_14"
+        ],
+        "effects": [
+          "effect_7"
+        ],
+        "children": []
+      },
+      {
+        "id": "component_7",
+        "name": "Quiz",
+        "props": [],
+        "states": [
+          "state_15",
+          "state_16",
+          "state_17",
+          "state_18"
+        ],
+        "effects": [
+          "effect_8",
+          "effect_9"
+        ],
+        "children": [
+          "component_16"
+        ]
+      },
+      {
+        "id": "component_8",
+        "name": "Register",
+        "props": [],
+        "states": [
+          "state_19",
+          "state_20",
+          "state_21"
+        ],
+        "effects": [
+          "effect_10"
+        ],
+        "children": []
+      },
+      {
+        "id": "component_9",
+        "name": "FilteredItems",
+        "props": [
+          "prop_10"
+        ],
+        "states": [],
+        "effects": [],
+        "children": []
+      },
+      {
+        "id": "component_10",
+        "name": "FilteredPaginatedItems",
+        "props": [
+          "prop_11",
+          "prop_12",
+          "prop_13",
+          "prop_14"
+        ],
+        "states": [
+          "state_22",
+          "state_23"
+        ],
+        "effects": [
+          "effect_11"
+        ],
+        "children": [
+          "component_9"
+        ]
+      },
+      {
+        "id": "component_11",
+        "name": "Items",
+        "props": [
+          "prop_15"
+        ],
+        "states": [],
+        "effects": [],
+        "children": []
+      },
+      {
+        "id": "component_12",
+        "name": "KakaoRecommendButton",
+        "props": [
+          "prop_16",
+          "prop_17",
+          "prop_18"
+        ],
+        "states": [],
+        "effects": [
+          "effect_12"
+        ],
+        "children": []
+      },
+      {
+        "id": "component_13",
+        "name": "KakaoShareButton",
+        "props": [],
+        "states": [],
+        "effects": [
+          "effect_13"
+        ],
+        "children": []
+      },
+      {
+        "id": "component_14",
+        "name": "PaginatedItems",
+        "props": [
+          "prop_29"
+        ],
+        "states": [],
+        "effects": [
+          "effect_14"
+        ],
+        "children": [
+          "component_11"
+        ]
+      },
+      {
+        "id": "component_15",
+        "name": "QuizHeader",
+        "props": [],
+        "states": [],
+        "effects": [],
+        "children": []
+      },
+      {
+        "id": "component_16",
+        "name": "RecommendItems",
+        "props": [
+          "prop_19",
+          "prop_20"
+        ],
+        "states": [],
+        "effects": [],
+        "children": [
+          "component_12"
+        ]
+      },
+      {
+        "id": "component_17",
+        "name": "StarRates",
+        "props": [
+          "prop_28"
+        ],
+        "states": [],
+        "effects": [],
+        "children": []
+      }
+    ]
+  },
+  "stateList": {
+    "total": 23,
+    "items": [
+      {
+        "id": "state_1",
+        "name": "pageCount",
+        "root": "component_1"
+      },
+      {
+        "id": "state_2",
+        "name": "currentAlcoholList",
+        "root": "component_1"
+      },
+      {
+        "id": "state_3",
+        "name": "itemOffset",
+        "root": "component_1"
+      },
+      {
+        "id": "state_4",
+        "name": "dummyAlcoholList",
+        "root": "component_1"
+      },
+      {
+        "id": "state_5",
+        "name": "currentAlcoholId",
+        "root": "component_1"
+      },
+      {
+        "id": "state_6",
+        "name": "category",
+        "root": "component_1"
+      },
+      {
+        "id": "state_7",
+        "name": "filteredAlcoholList",
+        "root": "component_1"
+      },
+      {
+        "id": "state_8",
+        "name": "filteredItemOffset",
+        "root": "component_1"
+      },
+      {
+        "id": "state_9",
+        "name": "filteredItemsId",
+        "root": "component_1"
+      },
+      {
+        "id": "state_10",
+        "name": "starRate",
+        "root": "component_2"
+      },
+      {
+        "id": "state_11",
+        "name": "review",
+        "root": "component_2"
+      },
+      {
+        "id": "state_12",
+        "name": "filteredPageCount",
+        "root": "component_5"
+      },
+      {
+        "id": "state_13",
+        "name": "email",
+        "root": "component_6"
+      },
+      {
+        "id": "state_14",
+        "name": "password",
+        "root": "component_6"
+      },
+      {
+        "id": "state_15",
+        "name": "quizNumber",
+        "root": "component_7"
+      },
+      {
+        "id": "state_16",
+        "name": "conditionList",
+        "root": "component_7"
+      },
+      {
+        "id": "state_17",
+        "name": "mbti",
+        "root": "component_7"
+      },
+      {
+        "id": "state_18",
+        "name": "recommendedAlcohols",
+        "root": "component_7"
+      },
+      {
+        "id": "state_19",
+        "name": "email",
+        "root": "component_8"
+      },
+      {
+        "id": "state_20",
+        "name": "password",
+        "root": "component_8"
+      },
+      {
+        "id": "state_21",
+        "name": "nickname",
+        "root": "component_8"
+      },
+      {
+        "id": "state_22",
+        "name": "currentFilteredAlcoholList",
+        "root": "component_10"
+      },
+      {
+        "id": "state_23",
+        "name": "filteredItemOffset",
+        "root": "component_10"
+      }
+    ]
+  },
+  "effectList": {
+    "total": 14,
+    "items": [
+      {
+        "id": "effect_1",
+        "root": "component_2",
+        "dependencyIds": []
+      },
+      {
+        "id": "effect_2",
+        "root": "component_2",
+        "dependencyIds": []
+      },
+      {
+        "id": "effect_3",
+        "root": "component_3",
+        "dependencyIds": []
+      },
+      {
+        "id": "effect_4",
+        "root": "component_3",
+        "dependencyIds": []
+      },
+      {
+        "id": "effect_5",
+        "root": "component_5",
+        "dependencyIds": []
+      },
+      {
+        "id": "effect_6",
+        "root": "component_5",
+        "dependencyIds": [
+          "prop_8"
+        ]
+      },
+      {
+        "id": "effect_7",
+        "root": "component_6",
+        "dependencyIds": []
+      },
+      {
+        "id": "effect_8",
+        "root": "component_7",
+        "dependencyIds": []
+      },
+      {
+        "id": "effect_9",
+        "root": "component_7",
+        "dependencyIds": [
+          "state_15"
+        ]
+      },
+      {
+        "id": "effect_10",
+        "root": "component_8",
+        "dependencyIds": []
+      },
+      {
+        "id": "effect_11",
+        "root": "component_10",
+        "dependencyIds": [
+          "prop_14",
+          "state_23",
+          "prop_11"
+        ]
+      },
+      {
+        "id": "effect_12",
+        "root": "component_12",
+        "dependencyIds": []
+      },
+      {
+        "id": "effect_13",
+        "root": "component_13",
+        "dependencyIds": []
+      },
+      {
+        "id": "effect_14",
+        "root": "component_14",
+        "dependencyIds": [
+          "prop_29"
+        ]
+      }
+    ]
+  },
+  "propList": {
+    "total": 29,
+    "items": [
+      {
+        "id": "prop_1",
+        "name": "dummyAlcoholList",
+        "root": "component_2"
+      },
+      {
+        "id": "prop_2",
+        "name": "setDummyAlcoholList",
+        "root": "component_2"
+      },
+      {
+        "id": "prop_3",
+        "name": "dummyAlcoholList",
+        "root": "component_5"
+      },
+      {
+        "id": "prop_4",
+        "name": "filteredAlcoholList",
+        "root": "component_5"
+      },
+      {
+        "id": "prop_5",
+        "name": "setFilteredAlcoholList",
+        "root": "component_5"
+      },
+      {
+        "id": "prop_6",
+        "name": "filteredItemOffset",
+        "root": "component_5"
+      },
+      {
+        "id": "prop_7",
+        "name": "setFilteredItemOffset",
+        "root": "component_5"
+      },
+      {
+        "id": "prop_8",
+        "name": "filteredItemsId",
+        "root": "component_5"
+      },
+      {
+        "id": "prop_9",
+        "name": "setFilteredItemsId",
+        "root": "component_5"
+      },
+      {
+        "id": "prop_10",
+        "name": "currentFilteredAlcoholList",
+        "root": "component_9"
+      },
+      {
+        "id": "prop_11",
+        "name": "itemsPerPage",
+        "root": "component_10"
+      },
+      {
+        "id": "prop_12",
+        "name": "pageCount",
+        "root": "component_10"
+      },
+      {
+        "id": "prop_13",
+        "name": "setPageCount",
+        "root": "component_10"
+      },
+      {
+        "id": "prop_14",
+        "name": "alcoholList",
+        "root": "component_10"
+      },
+      {
+        "id": "prop_15",
+        "name": "currentItems",
+        "root": "component_11"
+      },
+      {
+        "id": "prop_16",
+        "name": "description",
+        "root": "component_12"
+      },
+      {
+        "id": "prop_17",
+        "name": "buttonTitle",
+        "root": "component_12"
+      },
+      {
+        "id": "prop_18",
+        "name": "alcohol",
+        "root": "component_12"
+      },
+      {
+        "id": "prop_19",
+        "name": "mbtiCharacter",
+        "root": "component_16"
+      },
+      {
+        "id": "prop_20",
+        "name": "alcohols",
+        "root": "component_16"
+      },
+      {
+        "id": "prop_21",
+        "name": "pageCount",
+        "root": "component_3"
+      },
+      {
+        "id": "prop_22",
+        "name": "setPageCount",
+        "root": "component_3"
+      },
+      {
+        "id": "prop_23",
+        "name": "currentAlcoholList",
+        "root": "component_3"
+      },
+      {
+        "id": "prop_24",
+        "name": "setCurrentAlcoholList",
+        "root": "component_3"
+      },
+      {
+        "id": "prop_25",
+        "name": "itemOffset",
+        "root": "component_3"
+      },
+      {
+        "id": "prop_26",
+        "name": "setItemOffset",
+        "root": "component_3"
+      },
+      {
+        "id": "prop_27",
+        "name": "category",
+        "root": "component_3"
+      },
+      {
+        "id": "prop_28",
+        "name": "starNum",
+        "root": "component_17"
+      },
+      {
+        "id": "prop_29",
+        "name": "itemsPerPage",
+        "root": "component_14"
+      }
+    ]
   }
+}
